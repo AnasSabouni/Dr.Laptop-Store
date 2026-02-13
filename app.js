@@ -505,6 +505,9 @@ class ProductManager {
                         <button class="view-details" onclick="showProductDetails(${product.id})">
                             <i class="fas fa-eye"></i> تفاصيل
                         </button>
+                        <button class="zoom-view" onclick="showProductZoom(${product.id})">
+                            <i class="fas fa-search-plus"></i> معاينة تكبير
+                        </button>
                     </div>
                 </div>
             </div>
@@ -577,6 +580,12 @@ function showProductDetails(productId) {
                                        cursor: pointer; width: 100%;">
                             <i class="fas fa-cart-plus"></i> أضف إلى السلة
                         </button>
+                                            <button onclick="showProductZoom(${product.id})"
+                                                    style="background: #10b981; color: white; border: none;
+                                                           padding: 12px 20px; border-radius: 8px; font-size: 1rem;
+                                                           cursor: pointer; margin-top: 12px; width: 100%;">
+                                                <i class="fas fa-search-plus"></i> تكبير الصورة
+                                            </button>
                     </div>
                 </div>
             </div>
@@ -813,15 +822,41 @@ function setupMobileMenu() {
     const navLinks = document.querySelector('.nav-links');
    
     if (menuToggle && navLinks) {
-        menuToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
+        // toggle menu and body scroll
+        menuToggle.setAttribute('aria-expanded', 'false');
+        menuToggle.addEventListener('click', (e) => {
+            const opened = navLinks.classList.toggle('active');
+            document.body.classList.toggle('no-scroll', opened);
+            menuToggle.setAttribute('aria-expanded', opened ? 'true' : 'false');
         });
-       
+
         // إغلاق القائمة عند النقر على رابط
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', () => {
                 navLinks.classList.remove('active');
+                document.body.classList.remove('no-scroll');
+                menuToggle.setAttribute('aria-expanded', 'false');
             });
+        });
+
+        // إغلاق عند النقر خارج القائمة
+        document.addEventListener('click', (e) => {
+            if (!navLinks.classList.contains('active')) return;
+            const target = e.target;
+            if (!navLinks.contains(target) && !menuToggle.contains(target)) {
+                navLinks.classList.remove('active');
+                document.body.classList.remove('no-scroll');
+                menuToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // إغلاق عند الضغط على Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+                navLinks.classList.remove('active');
+                document.body.classList.remove('no-scroll');
+                menuToggle.setAttribute('aria-expanded', 'false');
+            }
         });
     }
 }
@@ -988,6 +1023,100 @@ window.addProductToStorage = function(product) {
     productManager.products = products;
     productManager.render();
 };
+
+// عرض مودال تكبير الصور مشابه لأمازون
+function showProductZoom(productId) {
+    const products = StorageManager.getProducts();
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    const imgs = (product.images && product.images.length > 0) ? product.images : [product.mainImage || product.image];
+    const mainSrc = imgs[0];
+
+    const modalHTML = `
+        <div class="modal-overlay" id="zoom-modal" style="
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7); z-index: 3000; display: flex;
+            align-items: center; justify-content: center; padding: 20px;">
+            <div style="background: white; border-radius: 12px; max-width: 1100px; width: 100%; max-height: 90vh; overflow: hidden; display: flex; gap: 0;">
+                <div style="flex: 1; padding: 20px; display: flex; gap: 20px; align-items:flex-start;">
+                    <div style="flex: 1; display: flex; gap: 20px; align-items: flex-start;">
+                        <div id="zoom-wrap" style="position:relative; display:flex; align-items:center; justify-content:center;">
+                            <img id="zoom-main-img" src="${mainSrc}" alt="${product.name}" style="max-width:600px; max-height:70vh; display:block; object-fit:contain; cursor: crosshair;">
+                        </div>
+                        <div id="zoom-result" style="width:300px; height:300px; border:1px solid #ddd; background-repeat:no-repeat; background-size: 200% 200%; display:none; box-shadow:0 10px 30px rgba(0,0,0,0.15); flex-shrink:0; border-radius:8px; background-position: center;">
+                        </div>
+                    </div>
+                    <div style="width:230px; padding: 20px; border-left:1px solid #f0f0f0; box-sizing:border-box; overflow:auto;">
+                        <h3 style="margin-top:0;">${product.name}</h3>
+                        <p style="color:#64748b;">${product.description || ''}</p>
+                        <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+                            ${imgs.map(img => `<img src="${img}" data-src="${img}" class="zoom-thumb" style="width:60px;height:60px;object-fit:cover;border:1px solid #eee;border-radius:6px;cursor:pointer;">`).join('')}
+                        </div>
+                        <div style="margin-top:20px; color:#1e293b; font-weight:700; font-size:1.2rem;">${product.discount > 0 ? (product.price * (1 - product.discount/100)).toLocaleString('ar-SA') + ' $' : product.price.toLocaleString('ar-SA') + ' $'}</div>
+                        <div style="margin-top:15px;"><button onclick="document.getElementById('zoom-modal').remove()" style="padding:10px 14px;border-radius:8px;border:none;background:#3b82f6;color:white;cursor:pointer;">إغلاق</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    const modal = document.getElementById('zoom-modal');
+    const mainImg = document.getElementById('zoom-main-img');
+    const result = document.getElementById('zoom-result');
+
+    // تحديث الخلفية لعنصر النتيجة
+    function updateResultBackground(src) {
+        result.style.backgroundImage = `url('${src}')`;
+    }
+
+    updateResultBackground(mainImg.src);
+
+    // إظهار النتيجة عند الدخول
+    mainImg.addEventListener('mouseenter', () => {
+        result.style.display = 'block';
+    });
+
+    mainImg.addEventListener('mouseleave', () => {
+        result.style.display = 'none';
+    });
+
+    // حركة الماوس لتحديد موضع التكبير (حساب نسبي مناسب لخلفية الصورة)
+    mainImg.addEventListener('mousemove', function(e) {
+        const rect = mainImg.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const xPercent = (x / rect.width) * 100;
+        const yPercent = (y / rect.height) * 100;
+
+        result.style.backgroundPosition = `${xPercent}% ${yPercent}%`;
+
+        // اضبط حجم الخلفية بناءً على حجم الصورة المعروضة
+        const bgW = rect.width * 1.8;
+        const bgH = rect.height * 1.8;
+        result.style.backgroundSize = `${bgW}px ${bgH}px`;
+    });
+
+    // النقر على الصور المصغرة لتغيير الصورة الرئيسية
+    modal.querySelectorAll('.zoom-thumb').forEach(thumb => {
+        thumb.addEventListener('click', function() {
+            const src = this.dataset.src;
+            mainImg.src = src;
+            updateResultBackground(src);
+        });
+    });
+
+    // إغلاق عند الضغط خارج المحتوى
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) modal.remove();
+    });
+}
+
+// اجعل الدالة متاحة عالمياً
+window.showProductZoom = showProductZoom;
 
 // الحصول على بيانات العملاء (للمسؤول)
 window.getCustomersData = function() {

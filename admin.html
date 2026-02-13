@@ -915,6 +915,22 @@
                     previewProduct();
                 });
             }
+
+            // زر حفظ إضافي: ربط حدث النقر لضمان استدعاء الحفظ
+            const submitBtn = document.getElementById('submit-btn');
+            if (submitBtn) {
+                submitBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const form = document.getElementById('product-form');
+                    if (form) {
+                        // نفّذ حدث الإرسال على النموذج لالتقاط كافة المعالجات المرتبطة
+                        form.dispatchEvent(new Event('submit', { cancelable: true }));
+                    } else {
+                        // كخيار احتياطي، استدعِ الدالة مباشرة
+                        try { saveProduct(); } catch (err) { console.error(err); }
+                    }
+                });
+            }
             
             // البحث في المنتجات
             const searchInput = document.getElementById('admin-search');
