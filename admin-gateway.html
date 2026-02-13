@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة المدير | Dr.Laptop</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+       
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+       
+        .gateway-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.8s ease;
+        }
+       
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+       
+        .logo {
+            color: #3b82f6;
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+       
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+       
+        h1 {
+            color: white;
+            margin-bottom: 10px;
+            font-weight: 700;
+            font-size: 2rem;
+        }
+       
+        .subtitle {
+            color: #94a3b8;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+       
+        .security-badge {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            padding: 8px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+       
+        .input-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+       
+        .input-container i {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 1.2rem;
+        }
+       
+        input {
+            width: 100%;
+            padding: 18px 60px 18px 20px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 16px;
+            color: white;
+            transition: all 0.3s;
+        }
+       
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+       
+        input::placeholder {
+            color: #64748b;
+        }
+       
+        .access-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            padding: 18px;
+            width: 100%;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+       
+        .access-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+       
+        .access-btn:active {
+            transform: translateY(-1px);
+        }
+       
+        .access-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+       
+        .access-btn:hover::after {
+            left: 100%;
+        }
+       
+        .error-message {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            display: none;
+            animation: shake 0.5s;
+        }
+       
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+       
+        .device-info {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            text-align: right;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+       
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+       
+        .info-label {
+            color: #cbd5e1;
+        }
+       
+        .back-link {
+            display: inline-block;
+            margin-top: 25px;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+       
+        .back-link:hover {
+            color: #3b82f6;
+        }
+       
+        .ip-manager-link {
+            display: block;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 10px;
+            color: #60a5fa;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+       
+        .ip-manager-link:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateY(-3px);
+        }
+        
+        .otp-info {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #fbbf24;
+            font-size: 0.9rem;
+        }
+        
+        .otp-display {
+            font-family: monospace;
+            font-size: 1.5rem;
+            letter-spacing: 5px;
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            direction: ltr;
+            text-align: center;
+        }
+        
+        .timer {
+            color: #f59e0b;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="gateway-container">
+        <div class="logo">
+            <i class="fas fa-laptop-medical"></i>
+        </div>
+       
+        <h1>بوابة المدير الآمنة</h1>
+        <p class="subtitle">الوصول مقصور على المدير فقط</p>
+       
+        <div class="security-badge">
+            <i class="fas fa-shield-alt"></i> نظام حماية متعدد الطبقات
+        </div>
+       
+        <!-- قسم OTP -->
+        <div class="otp-info">
+            <i class="fas fa-key"></i>
+            <strong>رمز OTP للدخول من جهاز جديد:</strong>
+            <div class="otp-display" id="otp-display">جاري التوليد...</div>
+            <div class="timer" id="otp-timer">ينتهي خلال: 10:00</div>
+        </div>
+       
+        <form id="accessForm">
+            <div class="input-container">
+                <i class="fas fa-key"></i>
+                <input type="password" id="accessKey"
+                       placeholder="أدخل مفتاح الوصول السري"
+                       autocomplete="off" required>
+            </div>
+            
+            <div class="input-container" id="otp-container" style="display: none;">
+                <i class="fas fa-shield-alt"></i>
+                <input type="text" id="otpCode"
+                       placeholder="رمز OTP (6 أرقام) - للأجهزة الجديدة"
+                       maxlength="6" pattern="[0-9]{6}">
+            </div>
+           
+            <button type="submit" class="access-btn" id="accessButton">
+                <i class="fas fa-unlock-alt"></i> فتح بوابة المدير
+            </button>
+        </form>
+       
+        <div id="errorMessage" class="error-message">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="errorText">مفتاح الوصول غير صحيح</span>
+        </div>
+       
+        <!-- رابط إدارة الـ IPs -->
+        <a href="admin-ip-manager.html" class="ip-manager-link">
+            <i class="fas fa-network-wired"></i> إدارة الـ IPs والأجهزة
+        </a>
+       
+        <!-- معلومات الجهاز -->
+        <div class="device-info">
+            <div class="info-row">
+                <span class="info-label">بصمة الجهاز:</span>
+                <span id="deviceId">جاري التحقق...</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">نظام التشغيل:</span>
+                <span id="osInfo">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">وقت المحاولة:</span>
+                <span id="timeInfo">-</span>
+            </div>
+        </div>
+       
+        <a href="index.html" class="back-link">
+            <i class="fas fa-arrow-right"></i> العودة للمتجر العام
+        </a>
+    </div>
+
+    <!-- مكتبات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="admin-access.js"></script>
+   
+    <script>
+        // تحديث معلومات الجهاز
+        function updateDeviceInfo() {
+            document.getElementById('osInfo').textContent = navigator.platform;
+            document.getElementById('timeInfo').textContent = new Date().toLocaleString('ar-SA');
+            
+            // عرض بصمة الجهاز
+            if (window.adminAccess && window.adminAccess.currentDeviceId) {
+                document.getElementById('deviceId').textContent = 
+                    window.adminAccess.currentDeviceId.substring(0, 12) + '...';
+            }
+        }
+        
+        // توليد وعرض OTP
+        function generateAndDisplayOTP() {
+            if (window.adminAccess && window.adminAccess.generateOTP) {
+                const otp = window.adminAccess.generateOTP();
+                document.getElementById('otp-display').textContent = otp;
+                
+                // عد تنازلي للـ OTP (5 دقائق)
+                let timeLeft = 300; // 5 دقائق بالثواني
+                const timerElement = document.getElementById('otp-timer');
+                
+                const timerInterval = setInterval(() => {
+                    timeLeft--;
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    timerElement.textContent = `ينتهي خلال: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        const newOtp = window.adminAccess.generateOTP();
+                        document.getElementById('otp-display').textContent = newOtp;
+                        generateAndDisplayOTP(); // إعادة التشغيل
+                    }
+                }, 1000);
+            }
+        }
+       
+        // التحقق من الوصول
+        document.getElementById('accessForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+           
+            const accessKey = document.getElementById('accessKey').value;
+            const otpCode = document.getElementById('otpCode').value || null;
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            const accessBtn = document.getElementById('accessButton');
+           
+            // تغيير حالة الزر
+            accessBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحقق...';
+            accessBtn.disabled = true;
+           
+            // محاكاة وقت التحقق
+            await new Promise(resolve => setTimeout(resolve, 1000));
+           
+            // استخدام نظام المصادقة المحسن
+            if (window.adminAccess && window.adminAccess.authenticate) {
+                const result = window.adminAccess.authenticate(accessKey, otpCode);
+               
+                if (result.success) {
+                    // نجاح
+                    errorDiv.style.display = 'none';
+                    accessBtn.innerHTML = '<i class="fas fa-check"></i> تم التحقق بنجاح!';
+                    accessBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                   
+                    // توجيه بعد تأخير قصير
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 800);
+                } else {
+                    // فشل
+                    if (result.requiresOTP) {
+                        errorText.textContent = 'الجهاز غير معتمد. أدخل رمز OTP للدخول.';
+                        document.getElementById('otp-container').style.display = 'block';
+                    } else {
+                        errorText.textContent = result.error || 'مفتاح الوصول غير صحيح';
+                    }
+                    errorDiv.style.display = 'block';
+                    accessBtn.innerHTML = '<i class="fas fa-unlock-alt"></i> فتح بوابة المدير';
+                    accessBtn.disabled = false;
+                   
+                    // اهتزاز للحقل
+                    document.getElementById('accessKey').style.animation = 'shake 0.5s';
+                    setTimeout(() => {
+                        document.getElementById('accessKey').style.animation = '';
+                    }, 500);
+                }
+            } else {
+                // استخدام النظام القديم كبديل
+                if (window.adminAccess && window.adminAccess.simpleAuthenticate(accessKey)) {
+                    errorDiv.style.display = 'none';
+                    accessBtn.innerHTML = '<i class="fas fa-check"></i> تم التحقق بنجاح!';
+                    accessBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                   
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 800);
+                } else {
+                    errorText.textContent = 'مفتاح الوصول غير صحيح. حاول مرة أخرى.';
+                    errorDiv.style.display = 'block';
+                    accessBtn.innerHTML = '<i class="fas fa-unlock-alt"></i> فتح بوابة المدير';
+                    accessBtn.disabled = false;
+                }
+            }
+        });
+       
+        // تفعيل إدخال بمفتاح Enter
+        document.getElementById('accessKey').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('accessForm').requestSubmit();
+            }
+        });
+       
+        // تحديث معلومات الجهاز
+        updateDeviceInfo();
+        setInterval(updateDeviceInfo, 60000);
+        
+        // توليد وعرض OTP
+        setTimeout(() => {
+            generateAndDisplayOTP();
+        }, 1000);
+       
+        // تركيز على حقل الإدخال
+        document.getElementById('accessKey').focus();
+       
+        // تلقائي: عرض كلمة المرور الافتراضية (احذف هذا في الإنتاج)
+        console.log('كلمة المرور الافتراضية: Anas0217951@#$');
+    </script>
+</body>
+</html>

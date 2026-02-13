@@ -1,0 +1,931 @@
+ <!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الـ IPs والأجهزة | Dr.Laptop</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+       
+        body {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+       
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+       
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+        }
+       
+        .logo {
+            color: #3b82f6;
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+       
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: white;
+        }
+       
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+       
+        .ip-display {
+            background: rgba(59, 130, 246, 0.1);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+       
+        .ip-value {
+            font-family: monospace;
+            font-size: 1.5rem;
+            color: #60a5fa;
+            margin: 10px 0;
+            direction: ltr;
+            letter-spacing: 2px;
+        }
+       
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 25px;
+            border-radius: 10px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+       
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+        }
+       
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+       
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+       
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+       
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+       
+        .section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+       
+        h2 {
+            color: #cbd5e1;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+       
+        .form-group {
+            margin-bottom: 20px;
+        }
+       
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+       
+        input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+       
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+       
+        .ip-list, .device-list {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 15px;
+        }
+       
+        .ip-item, .device-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+       
+        .ip-item:hover, .device-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+       
+        .ip-address {
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: #60a5fa;
+        }
+       
+        .device-id {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+       
+        .ip-status, .device-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+       
+        .status-active {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+       
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+       
+        .action-btns {
+            display: flex;
+            gap: 10px;
+        }
+       
+        .btn-sm {
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+       
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+        }
+       
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #475569;
+        }
+       
+        .instructions {
+            background: rgba(59, 130, 246, 0.05);
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+       
+        .instructions h3 {
+            color: #60a5fa;
+            margin-bottom: 10px;
+        }
+       
+        .instructions ul {
+            padding-right: 20px;
+            color: #94a3b8;
+        }
+       
+        .instructions li {
+            margin-bottom: 10px;
+        }
+       
+        .footer-links {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+       
+        .footer-links a {
+            color: #60a5fa;
+            text-decoration: none;
+            margin: 0 15px;
+            transition: color 0.3s;
+        }
+       
+        .footer-links a:hover {
+            color: #3b82f6;
+            text-decoration: underline;
+        }
+       
+        .emergency-section {
+            border: 2px solid #f59e0b;
+            background: rgba(245, 158, 11, 0.05);
+        }
+       
+        .emergency-section h2 {
+            color: #f59e0b;
+        }
+       
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+       
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+           
+            .btn {
+                width: 100%;
+                justify-content: center;
+                margin-bottom: 10px;
+            }
+           
+            .action-btns {
+                flex-direction: column;
+            }
+           
+            .ip-item, .device-item {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+           
+            .action-btns {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-laptop-medical"></i>
+            </div>
+            <h1>إدارة الـ IPs والأجهزة</h1>
+            <p class="subtitle">تحكم فيمن يمكنه الوصول إلى لوحة التحكم</p>
+        </header>
+
+        <!-- عرض IP الحالي -->
+        <div class="ip-display">
+            <h3>الـ IP الحالي لجهازك:</h3>
+            <div class="ip-value" id="current-ip">جاري التعرف...</div>
+            <div class="btn-group">
+                <button class="btn btn-success" id="add-current-ip">
+                    <i class="fas fa-plus-circle"></i> إضافة الـ IP الحالي
+                </button>
+                <button class="btn btn-primary" id="copy-ip">
+                    <i class="fas fa-copy"></i> نسخ الـ IP
+                </button>
+                <button class="btn btn-warning" id="show-my-ip">
+                    <i class="fas fa-search"></i> العثور على IP
+                </button>
+            </div>
+        </div>
+
+        <!-- قسم IP يدوي الطارئ -->
+        <div class="section emergency-section">
+            <h2><i class="fas fa-exclamation-triangle"></i> إضافة IP يدوياً (للطوارئ)</h2>
+            <p style="color: #fbbf24; margin-bottom: 15px;">
+                إذا لم يتم التعرف على IP تلقائياً، يمكنك إضافته يدوياً.
+            </p>
+           
+            <div class="form-group">
+                <label for="manual-ip">IP الحالي (ابحث عنه يدوياً):</label>
+                <input type="text" id="manual-ip"
+                       placeholder="اذهب إلى whatismyip.com ثم أدخل الـ IP هنا">
+            </div>
+           
+            <div class="btn-group">
+                <button class="btn btn-warning" onclick="findMyIPManually()">
+                    <i class="fas fa-search"></i> العثور على IP
+                </button>
+                <button class="btn btn-primary" onclick="addManualIP()">
+                    <i class="fas fa-plus-circle"></i> إضافة يدوياً
+                </button>
+            </div>
+           
+            <div style="margin-top: 15px; font-size: 0.9rem; color: #94a3b8;">
+                <i class="fas fa-info-circle"></i>
+                <a href="https://www.whatismyip.com" target="_blank" style="color: #60a5fa;">
+                    اضغط هنا للذهاب إلى whatismyip.com
+                </a>
+            </div>
+        </div>
+
+        <!-- قسم إضافة IP يدوي -->
+        <div class="section">
+            <h2><i class="fas fa-plus"></i> إضافة IP جديد يدوياً</h2>
+            <form id="add-ip-form">
+                <div class="form-group">
+                    <label for="new-ip">عنوان الـ IP:</label>
+                    <input type="text" id="new-ip"
+                           placeholder="مثال: 192.168.1.1 أو 102.88.35.147"
+                           pattern="^([0-9]{1,3}\.){3}[0-9]{1,3}$"
+                           required>
+                    <small style="color: #94a3b8; display: block; margin-top: 5px;">
+                        تنسيق IPv4: xxx.xxx.xxx.xxx (أرقام من 0-255)
+                    </small>
+                </div>
+               
+                <div class="form-group">
+                    <label for="ip-note">ملاحظة (اختياري):</label>
+                    <input type="text" id="ip-note"
+                           placeholder="مثال: جهازي المنزلي، مكتب العمل...">
+                </div>
+               
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> إضافة الـ IP
+                </button>
+            </form>
+        </div>
+
+        <!-- قسم إضافة نطاق IP -->
+        <div class="section">
+            <h2><i class="fas fa-globe"></i> إضافة نطاق IP (لحل مشكلة IP المتغير)</h2>
+            <p style="color: #94a3b8; margin-bottom: 15px;">
+                إذا كان IP يتغير باستمرار، أضف نطاقاً مثل: <code>102.88.35.*</code>
+            </p>
+            <form id="add-network-form">
+                <div class="form-group">
+                    <label for="network-pattern">نطاق الـ IP:</label>
+                    <input type="text" id="network-pattern"
+                           placeholder="مثال: 102.88.35.* أو 192.168.1.*"
+                           pattern="^([0-9]{1,3}\.){2}[0-9]{1,3}\.\*$"
+                           required>
+                    <small style="color: #94a3b8; display: block; margin-top: 5px;">
+                        استخدم * للجزء الأخير: xxx.xxx.xxx.*
+                    </small>
+                </div>
+               
+                <div class="form-group">
+                    <label for="network-note">ملاحظة:</label>
+                    <input type="text" id="network-note"
+                           placeholder="مثال: نطاق بيوت العمل، جميع أجهزتي...">
+                </div>
+               
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> إضافة النطاق
+                </button>
+            </form>
+        </div>
+
+        <!-- قسم إدارة الأجهزة -->
+        <div class="section">
+            <h2><i class="fas fa-mobile-alt"></i> إدارة الأجهزة المسموحة</h2>
+            <p style="color: #94a3b8; margin-bottom: 15px;">
+                نظام الحماية يعتمد على بصمة الجهاز الفريدة
+            </p>
+           
+            <div class="device-list" id="device-list">
+                <!-- الأجهزة تضاف هنا -->
+            </div>
+           
+            <div class="btn-group" style="margin-top: 15px;">
+                <button class="btn btn-success" onclick="addCurrentDevice()">
+                    <i class="fas fa-plus-circle"></i> إضافة هذا الجهاز
+                </button>
+                <button class="btn btn-warning" onclick="generateOTP()">
+                    <i class="fas fa-key"></i> توليد OTP جديد
+                </button>
+                <button class="btn btn-primary" onclick="refreshDevices()">
+                    <i class="fas fa-sync-alt"></i> تحديث القائمة
+                </button>
+            </div>
+        </div>
+
+        <!-- قائمة الـ IPs المسموحة -->
+        <div class="section">
+            <h2><i class="fas fa-list"></i> الـ IPs المسموحة حالياً</h2>
+            <div class="ip-list" id="ip-list">
+                <!-- الـ IPs تضاف هنا -->
+            </div>
+        </div>
+
+        <!-- تعليمات -->
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> كيفية استخدام النظام:</h3>
+            <ul>
+                <li>الـ IP هو عنوان الإنترنت الخاص بجهازك</li>
+                <li>يمكنك إضافة أكثر من IP (منزل، عمل، جوال)</li>
+                <li>للعثور على IP جهازك: <a href="https://www.whatismyip.com" target="_blank">whatismyip.com</a></li>
+                <li>الـ IP المنزلي عادة يتغير عند إعادة تشغيل الراوتر</li>
+                <li>لـ IP ثابت، راسل مزود الإنترنت أو استخدم VPN</li>
+                <li><strong>النظام الجديد يعتمد على بصمة الجهاز + OTP للأمان</strong></li>
+            </ul>
+        </div>
+
+        <!-- روابط -->
+        <div class="footer-links">
+            <a href="admin.html"><i class="fas fa-cogs"></i> لوحة التحكم</a>
+            <a href="admin-gateway.html"><i class="fas fa-key"></i> بوابة الدخول</a>
+            <a href="index.html"><i class="fas fa-store"></i> المتجر الرئيسي</a>
+            <a href="#" id="clear-all"><i class="fas fa-trash"></i> مسح الكل</a>
+        </div>
+    </div>
+
+    <!-- مكتبات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+   
+    <script>
+        // إدارة الـ IPs
+        class IPManager {
+            constructor() {
+                this.allowedIPs = this.getAllowedIPs();
+                this.init();
+            }
+           
+            init() {
+                this.displayCurrentIP();
+                this.loadIPsList();
+                this.setupEventListeners();
+                this.loadDevicesList();
+            }
+           
+            async getCurrentIP() {
+                try {
+                    const services = [
+                        'https://api.ipify.org?format=json',
+                        'https://api64.ipify.org?format=json',
+                        'https://ipinfo.io/json',
+                        'https://checkip.amazonaws.com/'
+                    ];
+                   
+                    for (const service of services) {
+                        try {
+                            const response = await fetch(service);
+                            const data = await response.json();
+                            if (data.ip) return data.ip;
+                            if (typeof data === 'string') return data.trim();
+                        } catch (error) {
+                            console.log('فشلت الخدمة:', service);
+                        }
+                    }
+                   
+                    return 'غير معروف';
+                } catch (error) {
+                    console.error('Error fetching IP:', error);
+                    return 'غير معروف';
+                }
+            }
+           
+            async displayCurrentIP() {
+                const currentIP = await this.getCurrentIP();
+                const ipElement = document.getElementById('current-ip');
+                ipElement.textContent = currentIP;
+               
+                const isAllowed = this.isIPAllowed(currentIP);
+                const status = isAllowed ? '🟢 مسموح' : '🔴 غير مسموح';
+                ipElement.innerHTML +=
+                    `<div style="font-size: 0.9rem; color: ${isAllowed ? '#10b981' : '#ef4444'}; margin-top: 5px;">
+                        ${status}
+                    </div>`;
+               
+                if (currentIP && currentIP !== 'جاري التعرف...' && currentIP !== 'غير معروف') {
+                    this.addConvertToNetworkButton(currentIP);
+                }
+            }
+           
+            addConvertToNetworkButton(currentIP) {
+                const parts = currentIP.split('.');
+                if (parts.length === 4) {
+                    const networkPattern = `${parts[0]}.${parts[1]}.${parts[2]}.*`;
+                   
+                    const convertBtn = document.createElement('button');
+                    convertBtn.className = 'btn btn-success';
+                    convertBtn.innerHTML = '<i class="fas fa-exchange-alt"></i> تحويل إلى نطاق';
+                    convertBtn.onclick = () => {
+                        if (confirm(`هل تريد تحويل ${currentIP} إلى النطاق ${networkPattern}؟`)) {
+                            if (window.adminAccess && window.adminAccess.addNetwork) {
+                                window.adminAccess.addNetwork(networkPattern, `تم التحويل من ${currentIP}`);
+                                alert('تم تحويل IP إلى نطاق! سيتم السماح لجميع الـ IPs في هذا النطاق.');
+                            }
+                        }
+                    };
+                   
+                    const ipDisplay = document.querySelector('.ip-display .btn-group');
+                    if (ipDisplay) {
+                        ipDisplay.appendChild(convertBtn);
+                    }
+                }
+            }
+           
+            getAllowedIPs() {
+                const ips = localStorage.getItem('drlaptop_allowed_ips');
+                return ips ? JSON.parse(ips) : [];
+            }
+           
+            saveAllowedIPs() {
+                localStorage.setItem('drlaptop_allowed_ips', JSON.stringify(this.allowedIPs));
+            }
+           
+            addIP(ipAddress, note = '') {
+                if (!this.validateIP(ipAddress)) {
+                    alert('عنوان IP غير صالح!');
+                    return false;
+                }
+               
+                if (this.allowedIPs.some(item => item.ip === ipAddress)) {
+                    alert('هذا الـ IP مضاف مسبقاً!');
+                    return false;
+                }
+               
+                this.allowedIPs.push({
+                    ip: ipAddress,
+                    note: note || `تم الإضافة في ${new Date().toLocaleString('ar-SA')}`,
+                    addedAt: new Date().toISOString(),
+                    active: true
+                });
+               
+                this.saveAllowedIPs();
+                this.loadIPsList();
+                return true;
+            }
+           
+            removeIP(ipAddress) {
+                this.allowedIPs = this.allowedIPs.filter(item => item.ip !== ipAddress);
+                this.saveAllowedIPs();
+                this.loadIPsList();
+            }
+           
+            toggleIP(ipAddress) {
+                const ip = this.allowedIPs.find(item => item.ip === ipAddress);
+                if (ip) {
+                    ip.active = !ip.active;
+                    this.saveAllowedIPs();
+                    this.loadIPsList();
+                }
+            }
+           
+            validateIP(ip) {
+                if (ip === 'غير معروف' || ip === 'unknown') return true;
+               
+                const ipPattern = /^([0-9]{1,3}\.){3}[0-9]{1,3}$/;
+                if (!ipPattern.test(ip)) return false;
+               
+                const parts = ip.split('.');
+                for (let part of parts) {
+                    const num = parseInt(part);
+                    if (num < 0 || num > 255) return false;
+                }
+               
+                return true;
+            }
+           
+            isIPAllowed(ip) {
+                const allowed = this.allowedIPs.find(item =>
+                    item.ip === ip && item.active === true
+                );
+                return !!allowed;
+            }
+           
+            loadIPsList() {
+                const container = document.getElementById('ip-list');
+               
+                if (this.allowedIPs.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-network-wired"></i>
+                            <h4>لا توجد IPs مسموحة</h4>
+                            <p>أضف أول IP باستخدام النموذج أعلاه</p>
+                        </div>
+                    `;
+                    return;
+                }
+               
+                container.innerHTML = this.allowedIPs.map(ip => `
+                    <div class="ip-item">
+                        <div>
+                            <div class="ip-address">${ip.ip}</div>
+                            <div style="color: #94a3b8; font-size: 0.9rem; margin-top: 5px;">
+                                <i class="fas fa-sticky-note"></i> ${ip.note}
+                                ${ip.autoAdded ? '<span style="color: #f59e0b; margin-right: 10px;">(تمت الإضافة تلقائياً)</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="action-btns">
+                            <span class="ip-status ${ip.active ? 'status-active' : 'status-inactive'}">
+                                ${ip.active ? 'نشط' : 'غير نشط'}
+                            </span>
+                            <button class="btn btn-sm btn-danger" onclick="ipManager.removeIP('${ip.ip}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button class="btn btn-sm ${ip.active ? 'btn-danger' : 'btn-success'}"
+                                    onclick="ipManager.toggleIP('${ip.ip}')">
+                                <i class="fas fa-power-off"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+           
+            // إدارة الأجهزة
+            loadDevicesList() {
+                if (!window.adminAccess || !window.adminAccess.getDevices) {
+                    setTimeout(() => this.loadDevicesList(), 1000);
+                    return;
+                }
+                
+                const devices = window.adminAccess.getDevices();
+                const container = document.getElementById('device-list');
+                
+                if (!devices || devices.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-mobile-alt"></i>
+                            <h4>لا توجد أجهزة مسموحة</h4>
+                            <p>أضف أول جهاز باستخدام الزر أعلاه</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = devices.map(device => `
+                    <div class="device-item">
+                        <div>
+                            <div style="font-weight: bold; color: #60a5fa;">${device.name}</div>
+                            <div class="device-id">${device.id.substring(0, 16)}...</div>
+                            <div style="color: #94a3b8; font-size: 0.8rem; margin-top: 5px;">
+                                <i class="far fa-clock"></i> ${new Date(device.lastAccess).toLocaleDateString('ar-SA')}
+                                <br>
+                                <i class="fas fa-globe"></i> ${device.ip || 'غير معروف'}
+                            </div>
+                        </div>
+                        <div class="action-btns">
+                            <span class="device-status ${device.active ? 'status-active' : 'status-inactive'}">
+                                ${device.active ? 'نشط' : 'غير نشط'}
+                            </span>
+                            <button class="btn btn-sm btn-warning" onclick="toggleDevice('${device.id}')">
+                                <i class="fas fa-power-off"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="removeDevice('${device.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+           
+            setupEventListeners() {
+                document.getElementById('add-current-ip').addEventListener('click', async () => {
+                    const currentIP = await this.getCurrentIP();
+                    if (currentIP !== 'غير معروف') {
+                        const note = prompt('أدخل ملاحظة لهذا الـ IP (اختياري):', 'الجهاز الرئيسي');
+                        if (this.addIP(currentIP, note || `الـ IP الحالي - ${new Date().toLocaleDateString('ar-SA')}`)) {
+                            alert('تم إضافة الـ IP الحالي بنجاح!');
+                            this.displayCurrentIP();
+                        }
+                    } else {
+                        alert('لم يتم التعرف على الـ IP. استخدم قسم "إضافة يدوياً"');
+                    }
+                });
+               
+                document.getElementById('copy-ip').addEventListener('click', async () => {
+                    const currentIP = await this.getCurrentIP();
+                    navigator.clipboard.writeText(currentIP).then(() => {
+                        const btn = document.getElementById('copy-ip');
+                        const originalHTML = btn.innerHTML;
+                        btn.innerHTML = '<i class="fas fa-check"></i> تم النسخ!';
+                        setTimeout(() => {
+                            btn.innerHTML = originalHTML;
+                        }, 2000);
+                    });
+                });
+               
+                document.getElementById('show-my-ip').addEventListener('click', () => {
+                    findMyIPManually();
+                });
+               
+                document.getElementById('add-ip-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                   
+                    const ip = document.getElementById('new-ip').value.trim();
+                    const note = document.getElementById('ip-note').value.trim();
+                   
+                    if (this.addIP(ip, note)) {
+                        alert('تم إضافة الـ IP بنجاح!');
+                        document.getElementById('add-ip-form').reset();
+                    }
+                });
+               
+                document.getElementById('add-network-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                   
+                    const pattern = document.getElementById('network-pattern').value.trim();
+                    const note = document.getElementById('network-note').value.trim();
+                   
+                    if (window.adminAccess && window.adminAccess.addNetwork) {
+                        if (window.adminAccess.addNetwork(pattern, note)) {
+                            alert('تم إضافة النطاق بنجاح!');
+                            document.getElementById('add-network-form').reset();
+                        }
+                    } else {
+                        alert('نظام الحماية غير متاح');
+                    }
+                });
+               
+                document.getElementById('clear-all').addEventListener('click', () => {
+                    if (confirm('هل تريد حذف جميع الـ IPs المسموحة؟ هذا الإجراء لا يمكن التراجع عنه.')) {
+                        this.allowedIPs = [];
+                        this.saveAllowedIPs();
+                        this.loadIPsList();
+                        alert('تم مسح جميع الـ IPs!');
+                    }
+                });
+               
+                document.getElementById('new-ip').addEventListener('input', function() {
+                    const ip = this.value.trim();
+                    if (ipManager.validateIP(ip)) {
+                        this.style.borderColor = '#10b981';
+                        this.style.background = 'rgba(16, 185, 129, 0.05)';
+                    } else if (ip.length > 0) {
+                        this.style.borderColor = '#ef4444';
+                        this.style.background = 'rgba(239, 68, 68, 0.05)';
+                    } else {
+                        this.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                        this.style.background = 'rgba(255, 255, 255, 0.07)';
+                    }
+                });
+            }
+        }
+       
+        // دوال إدارة الأجهزة
+        function addCurrentDevice() {
+            if (window.adminAccess && window.adminAccess.addAuthorizedDevice && window.adminAccess.currentDeviceId) {
+                const deviceName = prompt('أدخل اسماً للجهاز:', `جهاز ${new Date().toLocaleDateString('ar-SA')}`);
+                if (deviceName) {
+                    window.adminAccess.addAuthorizedDevice(window.adminAccess.currentDeviceId, deviceName);
+                    alert('تمت إضافة الجهاز بنجاح!');
+                    ipManager.loadDevicesList();
+                }
+            } else {
+                alert('نظام الحماية غير متاح. حاول تحديث الصفحة.');
+            }
+        }
+        
+        function toggleDevice(deviceId) {
+            if (window.adminAccess && window.adminAccess.toggleDevice) {
+                window.adminAccess.toggleDevice(deviceId);
+                ipManager.loadDevicesList();
+            }
+        }
+        
+        function removeDevice(deviceId) {
+            if (confirm('هل تريد حذف هذا الجهاز؟')) {
+                if (window.adminAccess && window.adminAccess.removeDevice) {
+                    window.adminAccess.removeDevice(deviceId);
+                    ipManager.loadDevicesList();
+                }
+            }
+        }
+        
+        function generateOTP() {
+            if (window.adminAccess && window.adminAccess.generateOTP) {
+                const otp = window.adminAccess.generateOTP();
+                alert(`رمز OTP الجديد: ${otp}\n\nصالح لمدة 5 دقائق\n\nاستخدمه مع كلمة المرور للدخول من جهاز جديد`);
+            }
+        }
+        
+        function refreshDevices() {
+            if (ipManager) {
+                ipManager.loadDevicesList();
+            }
+        }
+       
+        // دالة للعثور على IP يدوياً
+        function findMyIPManually() {
+            window.open('https://www.whatismyip.com', '_blank');
+           
+            setTimeout(() => {
+                const manualIP = prompt('اذهب إلى whatismyip.com ثم أدخل الـ IP هنا:');
+                if (manualIP) {
+                    document.getElementById('manual-ip').value = manualIP;
+                    alert('تم حفظ الـ IP! الآن اضغط "إضافة يدوياً"');
+                }
+            }, 1000);
+        }
+       
+        // دالة إضافة IP يدوياً
+        function addManualIP() {
+            const manualIP = document.getElementById('manual-ip').value.trim();
+           
+            if (!manualIP) {
+                alert('الرجاء إدخال الـ IP أولاً');
+                return;
+            }
+           
+            const ipPattern = /^([0-9]{1,3}\.){3}[0-9]{1,3}$/;
+            if (!ipPattern.test(manualIP)) {
+                alert('عنوان IP غير صالح!');
+                return;
+            }
+           
+            const note = prompt('أدخل ملاحظة لهذا الـ IP (اختياري):', 'تمت الإضافة يدوياً');
+           
+            if (window.ipManager && window.ipManager.addIP) {
+                if (window.ipManager.addIP(manualIP, note || 'تمت الإضافة يدوياً')) {
+                    alert('تم إضافة الـ IP بنجاح!');
+                    document.getElementById('manual-ip').value = '';
+                   
+                    if (window.adminAccess) {
+                        window.adminAccess.myIP = manualIP;
+                    }
+                }
+            } else {
+                const allowedIPs = JSON.parse(localStorage.getItem('drlaptop_allowed_ips') || '[]');
+                allowedIPs.push({
+                    ip: manualIP,
+                    note: note || 'تمت الإضافة يدوياً',
+                    addedAt: new Date().toISOString(),
+                    active: true
+                });
+                localStorage.setItem('drlaptop_allowed_ips', JSON.stringify(allowedIPs));
+                alert('تم إضافة الـ IP بنجاح!');
+            }
+        }
+       
+        // إنشاء مدير الـ IPs
+        const ipManager = new IPManager();
+        window.ipManager = ipManager;
+       
+        // إضافة IP افتراضي
+        setTimeout(() => {
+            if (ipManager.getAllowedIPs().length === 0) {
+                const defaultIPs = [
+                    { ip: '127.0.0.1', note: 'Localhost - للتطوير', active: true }
+                ];
+               
+                defaultIPs.forEach(defaultIP => {
+                    if (!ipManager.allowedIPs.some(ip => ip.ip === defaultIP.ip)) {
+                        ipManager.allowedIPs.push(defaultIP);
+                    }
+                });
+               
+                ipManager.saveAllowedIPs();
+                ipManager.loadIPsList();
+            }
+        }, 1000);
+
+        // تحميل قائمة الأجهزة عند فتح الصفحة
+        setTimeout(() => {
+            ipManager.loadDevicesList();
+        }, 1500);
+    </script>
+</body>
+</html>
