@@ -413,11 +413,18 @@ class CartManager {
 class ProductManager {
     constructor() {
         this.products = StorageManager.getProducts();
-        this.currentFilter = 'all';
+        this.currentFilter = 'laptops';
+        this.currentLaptopSubfilter = 'all';
+        this.currentAccessorySubfilter = 'all';
     }
 
     filterByCategory(category) {
+        // support high-level categories: 'all', 'laptops' (all except accessories),
+        // or specific categories like 'gaming', 'business', 'accessories'
         this.currentFilter = category;
+        // reset subfilters when switching main groups
+        if (category === 'accessories') this.currentAccessorySubfilter = 'all';
+        if (category === 'laptops') this.currentLaptopSubfilter = 'all';
         this.render();
     }
 
@@ -440,11 +447,20 @@ class ProductManager {
         const container = document.getElementById('products-grid');
         if (!container) return;
        
-        const products = productsToShow ||
-            (this.currentFilter === 'all' ?
-                this.products :
-                this.products.filter(p => p.category === this.currentFilter));
-       
+        // prepare source products depending on main filter/search
+        let products = productsToShow;
+        if (!products) {
+            if (this.currentFilter === 'all' || !this.currentFilter) {
+                products = this.products;
+            } else if (this.currentFilter === 'laptops') {
+                products = this.products.filter(p => p.category !== 'accessories');
+            } else if (this.currentFilter === 'accessories') {
+                products = this.products.filter(p => p.category === 'accessories');
+            } else {
+                products = this.products.filter(p => p.category === this.currentFilter);
+            }
+        }
+
         if (products.length === 0) {
             container.innerHTML = `
                 <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
@@ -455,63 +471,115 @@ class ProductManager {
             `;
             return;
         }
-       
-        container.innerHTML = products.map(product => `
-            <div class="product-card">
-                ${product.discount > 0 ? `
-                    <div class="product-badge">خصم ${product.discount}%</div>
-                ` : ''}
-               
-                <div class="product-image">
-                    <img src="${product.image}" alt="${product.name}"
-                         onerror="this.src='https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400'">
+
+        // Split into laptops and accessories
+        const accessories = products.filter(p => p.category === 'accessories');
+        const laptops = products.filter(p => p.category !== 'accessories');
+
+        // helper: map product.category to laptop subcategory
+        function laptopSubFor(product) {
+            if (product.category === 'gaming') return 'gaming';
+            if (product.category === 'premium') return 'engineering';
+            // business and student considered office/desktop
+            if (product.category === 'business' || product.category === 'student') return 'office';
+            return 'other';
+        }
+
+        // accessory subtypes by simple keyword matching
+        function accessoryTypeFor(product) {
+            const name = (product.name || '').toLowerCase();
+            if (name.includes('ماوس')) return 'ماوس';
+            if (name.includes('لوحة') || name.includes('لوحة مفاتيح')) return 'لوحة';
+            if (name.includes('حقيبة')) return 'حقيبة';
+            if (name.includes('شاحن')) return 'شاحن';
+            if (name.includes('مروحة')) return 'مروحة';
+            if (name.includes('حامل')) return 'حامل';
+            return 'أخرى';
+        }
+
+        // build accessory types list
+        const accessoryTypes = Array.from(new Set(accessories.map(accessoryTypeFor)));
+
+        // filter products by current subfilters
+        const filteredLaptops = laptops.filter(p => this.currentLaptopSubfilter === 'all' || laptopSubFor(p) === this.currentLaptopSubfilter);
+        const filteredAccessories = accessories.filter(p => this.currentAccessorySubfilter === 'all' || accessoryTypeFor(p) === this.currentAccessorySubfilter);
+
+        // render grouped HTML depending on current main filter
+        let html = '';
+
+        // show laptops section unless main filter is 'accessories'
+        if (this.currentFilter !== 'accessories') {
+            html += `
+            <div style="grid-column: 1 / -1;">
+                <div style="text-align: right; margin-bottom: 12px;">
+                    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-start;">
+                        <button class="filter-btn laptop-subfilter ${this.currentLaptopSubfilter === 'all' ? 'active' : ''}" data-sub="all">الكل</button>
+                        <button class="filter-btn laptop-subfilter ${this.currentLaptopSubfilter === 'gaming' ? 'active' : ''}" data-sub="gaming">جيمينج</button>
+                        <button class="filter-btn laptop-subfilter ${this.currentLaptopSubfilter === 'engineering' ? 'active' : ''}" data-sub="engineering">هندسي</button>
+                        <button class="filter-btn laptop-subfilter ${this.currentLaptopSubfilter === 'office' ? 'active' : ''}" data-sub="office">مكتبي</button>
+                    </div>
                 </div>
-               
+
+                <div class="products-grid">
+                    ${filteredLaptops.map(product => this._productCardHTML(product)).join('')}
+                </div>
+            </div>
+            `;
+        }
+
+        // show accessories section unless main filter is 'laptops'
+        if (this.currentFilter !== 'laptops') {
+            html += `
+            <div style="grid-column: 1 / -1; margin-top: 40px;">
+                <div style="text-align: right; margin-bottom: 12px;">
+                    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-start;">
+                        <button class="filter-btn accessory-subfilter ${this.currentAccessorySubfilter === 'all' ? 'active' : ''}" data-sub="all">الكل</button>
+                        ${accessoryTypes.map(t => `<button class="filter-btn accessory-subfilter ${this.currentAccessorySubfilter === t ? 'active' : ''}" data-sub="${t}">${t}</button>`).join('')}
+                    </div>
+                </div>
+
+                <div class="products-grid">
+                    ${filteredAccessories.map(product => this._productCardHTML(product)).join('')}
+                </div>
+            </div>
+            `;
+        }
+
+        container.innerHTML = html;
+    }
+
+    // small helper to generate product card markup (keeps render tidy)
+    _productCardHTML(product) {
+        return `
+            <div class="product-card">
+                ${product.discount > 0 ? `<div class="product-badge">خصم ${product.discount}%</div>` : ''}
+                <div class="product-image">
+                    <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400'">
+                </div>
                 <div class="product-content">
                     <h3 class="product-title">${product.name}</h3>
                     <p class="product-description">${product.description}</p>
-                   
                     <div class="product-specs">
-                        ${product.specs.processor ?
-                            `<span class="product-spec">${product.specs.processor}</span>` : ''}
-                        ${product.specs.ram ?
-                            `<span class="product-spec">${product.specs.ram}</span>` : ''}
-                        ${product.specs.storage ?
-                            `<span class="product-spec">${product.specs.storage}</span>` : ''}
+                        ${product.specs && product.specs.processor ? `<span class="product-spec">${product.specs.processor}</span>` : ''}
+                        ${product.specs && product.specs.ram ? `<span class="product-spec">${product.specs.ram}</span>` : ''}
+                        ${product.specs && product.specs.storage ? `<span class="product-spec">${product.specs.storage}</span>` : ''}
                     </div>
-                   
                     <div class="product-price">
-                        ${product.discount > 0 ? `
-                            <span class="original-price">${product.price.toLocaleString('ar-SA')} $</span>
-                        ` : ''}
-                        <span class="current-price">
-                            ${product.discount > 0 ?
-                                (product.price * (1 - product.discount/100)).toLocaleString('ar-SA') :
-                                product.price.toLocaleString('ar-SA')} $
-                        </span>
+                        ${product.discount > 0 ? `<span class="original-price">${product.price.toLocaleString('ar-SA')} $</span>` : ''}
+                        <span class="current-price">${product.discount > 0 ? (product.price * (1 - product.discount/100)).toLocaleString('ar-SA') : product.price.toLocaleString('ar-SA')} $</span>
                     </div>
-                   
                     <div class="product-rating">
-                        <div class="stars">
-                            ${'★'.repeat(Math.floor(product.rating))}${'☆'.repeat(5 - Math.floor(product.rating))}
-                        </div>
-                        <span class="rating-count">(${product.rating})</span>
+                        <div class="stars">${'★'.repeat(Math.floor(product.rating || 0))}${'☆'.repeat(5 - Math.floor(product.rating || 0))}</div>
+                        <span class="rating-count">(${product.rating || 0})</span>
                     </div>
-                   
                     <div class="product-actions">
-                        <button class="add-to-cart" onclick="cart.add(${product.id})">
-                            <i class="fas fa-cart-plus"></i> أضف للسلة
-                        </button>
-                        <button class="view-details" onclick="showProductDetails(${product.id})">
-                            <i class="fas fa-eye"></i> تفاصيل
-                        </button>
-                        <button class="zoom-view" onclick="showProductZoom(${product.id})">
-                            <i class="fas fa-search-plus"></i> معاينة تكبير
-                        </button>
+                        <button class="add-to-cart" onclick="cart.add(${product.id})"><i class="fas fa-cart-plus"></i> أضف للسلة</button>
+                        <button class="view-details" onclick="showProductDetails(${product.id})"><i class="fas fa-eye"></i> تفاصيل</button>
+                        <button class="zoom-view" onclick="showProductZoom(${product.id})"><i class="fas fa-search-plus"></i> معاينة تكبير</button>
                     </div>
                 </div>
             </div>
-        `).join('');
+        `;
     }
 }
 
@@ -882,17 +950,9 @@ document.addEventListener('DOMContentLoaded', function() {
     cart = new CartManager();
     productManager = new ProductManager();
    
-    // عدم عرض المنتجات مباشرة - انتظر اختيار الفئة
+    // عرض زر اختيار القسم أولاً — لا نعرض الأقسام حتى يضغط المستخدم
     const productsGrid = document.getElementById('products-grid');
-    if (productsGrid) {
-        productsGrid.innerHTML = `
-            <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
-                <i class="fas fa-folder-open" style="font-size: 4rem; color: #cbd5e1; margin-bottom: 20px;"></i>
-                <h3 style="color: #64748b; margin-bottom: 10px; font-size: 1.3rem;">اختر من الفئات أعلاه</h3>
-                <p style="color: #94a3b8;">اضغط على أي فئة لعرض المنتجات</p>
-            </div>
-        `;
-    }
+    // منتجات لم تُعرض بعد؛ سنعرضها عند ضغط أحد الأزرار
    
     // إعداد الأحداث
     setupEventListeners();
@@ -945,6 +1005,38 @@ function setupEventListeners() {
             }
         });
     }
+
+    // أزرار اختيار القسم من placeholder
+    const showLaptopsBtn = document.getElementById('show-laptops-btn');
+    const showAccessoriesBtn = document.getElementById('show-accessories-btn');
+    const productsPlaceholder = document.getElementById('products-placeholder');
+    const productsArea = document.getElementById('products-area');
+
+    function revealProductsArea() {
+        // لا نخفي placeholder أو قسم الفئات — فقط نظهر منطقة المنتجات إن كانت مخفية
+        if (productsArea) productsArea.style.display = 'block';
+    }
+
+    if (showLaptopsBtn) {
+        showLaptopsBtn.addEventListener('click', () => {
+            revealProductsArea();
+            // set main filter active
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.querySelector('.filter-btn[data-filter="laptops"]');
+            if (btn) btn.classList.add('active');
+            productManager.filterByCategory('laptops');
+        });
+    }
+
+    if (showAccessoriesBtn) {
+        showAccessoriesBtn.addEventListener('click', () => {
+            revealProductsArea();
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.querySelector('.filter-btn[data-filter="accessories"]');
+            if (btn) btn.classList.add('active');
+            productManager.filterByCategory('accessories');
+        });
+    }
    
     // سلة التسوق
     const cartIcon = document.getElementById('cart-icon');
@@ -995,6 +1087,25 @@ function setupEventListeners() {
                 document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
             }
         });
+    });
+
+    // subfilters (delegated) for laptops and accessories
+    document.addEventListener('click', function(e) {
+        const laptopBtn = e.target.closest && e.target.closest('.laptop-subfilter');
+        if (laptopBtn) {
+            const sub = laptopBtn.dataset.sub;
+            productManager.currentLaptopSubfilter = sub;
+            productManager.render();
+            return;
+        }
+
+        const accBtn = e.target.closest && e.target.closest('.accessory-subfilter');
+        if (accBtn) {
+            const sub = accBtn.dataset.sub;
+            productManager.currentAccessorySubfilter = sub;
+            productManager.render();
+            return;
+        }
     });
 }
 

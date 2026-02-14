@@ -164,28 +164,39 @@
     <section class="products" id="products">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">تشكيلتنا <span class="highlight">المميزة</span></h2>
-                <p class="section-subtitle">أفضل اللابتوبات بأفضل الأسعار</p>
+                <h2 class="section-title">
+                    <span class="section-main">اللابتوبات</span>
+                    <span style="color:var(--gray); margin:0 10px; font-weight:600;">/</span>
+                    <span class="section-main">الاكسسوارات</span>
+                </h2>
+                <p class="section-subtitle">اختر القسم أو استخدم المرشحات لعرض المنتجات</p>
             </div>
 
-            <!-- مرشحات -->
-            <div class="filters">
-                <button class="filter-btn active" data-filter="all">الكل</button>
-                <button class="filter-btn" data-filter="gaming">الألعاب</button>
-                <button class="filter-btn" data-filter="business">الأعمال</button>
-                <button class="filter-btn" data-filter="student">الطلاب</button>
-                <button class="filter-btn" data-filter="premium">فائقة</button>
-                <button class="filter-btn" data-filter="accessories">اكسسوارات</button>
-            </div>
+                <!-- بدلاً من عرض الأقسام مباشرة، نُظهر أزرار اختيار القسم أولاً -->
+                <div id="products-placeholder" style="text-align:center; padding:40px 20px;">
+                    <p style="color:var(--gray); font-size:1.05rem; margin-bottom:20px;">اختر القسم لعرض المنتجات</p>
+                    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                        <button id="show-laptops-btn" class="btn btn-primary">عرض اللابتوبات</button>
+                        <button id="show-accessories-btn" class="btn btn-primary">عرض الاكسسوارات</button>
+                    </div>
+                </div>
 
-            <!-- شبكة المنتجات -->
-            <div class="products-grid" id="products-grid">
-                <!-- المنتجات تضاف هنا بالجافاسكريبت -->
-            </div>
+                <div id="products-area" style="display:none;">
+                    <!-- شبكة المنتجات -->
+                    <div class="products-grid" id="products-grid">
+                        <!-- المنتجات تضاف هنا بالجافاسكريبت -->
+                    </div>
 
-            <!-- حالة التحميل -->
-            <div id="loading-products" class="loading-products">
-                <i class="fas fa-spinner fa-spin"></i> جاري تحميل المنتجات...
+                    <!-- حالة التحميل -->
+                    <div id="loading-products" class="loading-products">
+                        <i class="fas fa-spinner fa-spin"></i> جاري تحميل المنتجات...
+                    </div>
+                </div>
+            <!-- مرشحات رئيسية: اختر القسم -->
+            <!-- تم إخفاء الفلاتر مبدئيًا وتوجد شبكة المنتجات والـ loader داخل #products-area -->
+            <div class="filters" id="product-filters" style="display:none;">
+                <button class="filter-btn active" data-filter="laptops">اللابتوبات</button>
+                <button class="filter-btn" data-filter="accessories">الاكسسوارات</button>
             </div>
         </div>
     </section>

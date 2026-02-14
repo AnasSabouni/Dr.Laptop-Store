@@ -1018,3 +1018,68 @@ body.no-scroll {
     touch-action: none;
     height: 100vh;
 }
+
+/* ===== تحسين تناسق أزرار placeholder و الفلاتر ===== */
+#products-placeholder {
+    text-align: center;
+    padding: 36px 16px;
+}
+
+#products-placeholder .btn,
+#products-area .btn {
+    min-width: 150px;
+    padding: 12px 22px;
+    border-radius: 12px;
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* ensure filter buttons match the style and height of primary buttons */
+.filters {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 10px 20px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 15px;
+}
+
+.filter-btn.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+/* make placeholder and filter group visually aligned */
+#products-area {
+    padding-top: 8px;
+}
+
+/* Loading text centered and smaller so it doesn't push layout */
+.loading-products {
+    text-align: center;
+    padding: 20px 0;
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+    #products-placeholder .btn,
+    #products-area .filter-btn {
+        min-width: 120px;
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+}
