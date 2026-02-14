@@ -1032,7 +1032,49 @@ function showProductZoom(productId) {
 
     const imgs = (product.images && product.images.length > 0) ? product.images : [product.mainImage || product.image];
     const mainSrc = imgs[0];
+    // on touch devices or small screens use a simplified zoom (no hover pane)
+    const isTouch = (('ontouchstart' in window) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) || window.innerWidth <= 768);
 
+    if (isTouch) {
+        const modalHTMLTouch = `
+        <div class="modal-overlay" id="zoom-modal" style="
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85); z-index: 3000; display: flex;
+            align-items: center; justify-content: center; padding: 12px;">
+            <div style="background: transparent; width: 100%; max-width: 900px; max-height: 100vh; overflow: auto; border-radius: 12px;">
+                <div style="position: relative; padding: 12px; box-sizing: border-box;">
+                    <button onclick="document.getElementById('zoom-modal').remove()" style="position: absolute; top: 12px; left: 12px; z-index: 10; background: rgba(0,0,0,0.6); color: white; border: none; padding: 8px 10px; border-radius: 8px;">إغلاق</button>
+                    <img id="zoom-main-img" src="${mainSrc}" alt="${product.name}" style="width:100%; height:auto; display:block; border-radius:8px;">
+                    <div style="margin-top:12px; display:flex; gap:8px; overflow:auto;">
+                        ${imgs.map(img => `<img src="${img}" data-src="${img}" class="zoom-thumb" style="height:64px; object-fit:cover; border-radius:6px; cursor:pointer; flex:0 0 auto;">`).join('')}
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHTMLTouch);
+
+        const modalTouch = document.getElementById('zoom-modal');
+        const mainImgTouch = document.getElementById('zoom-main-img');
+
+        // change main image on thumbnail tap
+        modalTouch.querySelectorAll('.zoom-thumb').forEach(thumb => {
+            thumb.addEventListener('click', function() {
+                const src = this.dataset.src;
+                mainImgTouch.src = src;
+            });
+        });
+
+        // close when tapping outside content area
+        modalTouch.addEventListener('click', function(e) {
+            if (e.target === modalTouch) modalTouch.remove();
+        });
+
+        return;
+    }
+
+    // desktop behavior (mouse hover zoom)
     const modalHTML = `
         <div class="modal-overlay" id="zoom-modal" style="
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
