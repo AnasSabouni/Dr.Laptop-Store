@@ -774,6 +774,10 @@
             
             // إعداد الأحداث
             setupAdminEvents();
+            
+            // تهيئة الحقول المطلوبة بناءً على الاختيار الافتراضي
+            const defaultType = document.querySelector('input[name="product-type"]:checked').value;
+            switchProductType(defaultType);
         });
 
         // تحميل معلومات المستخدم
@@ -985,6 +989,13 @@
             const laptopLabel = document.getElementById('laptop-label');
             const accessoryLabel = document.getElementById('accessory-label');
             
+            const laptopName = document.getElementById('product-name');
+            const laptopPrice = document.getElementById('product-price');
+            const accName = document.getElementById('accessory-name');
+            const accPrice = document.getElementById('accessory-price');
+            const accDesc = document.getElementById('accessory-description');
+            const accImg = document.getElementById('accessory-image');
+            
             if (type === 'laptop') {
                 laptopFields.style.display = 'grid';
                 accessoryFields.style.display = 'none';
@@ -992,6 +1003,13 @@
                 laptopLabel.style.backgroundColor = '#f8f9ff';
                 accessoryLabel.style.borderColor = '#e0e0e0';
                 accessoryLabel.style.backgroundColor = 'transparent';
+                
+                if(laptopName) laptopName.required = true;
+                if(laptopPrice) laptopPrice.required = true;
+                if(accName) accName.required = false;
+                if(accPrice) accPrice.required = false;
+                if(accDesc) accDesc.required = false;
+                if(accImg) accImg.required = false;
             } else {
                 laptopFields.style.display = 'none';
                 accessoryFields.style.display = 'block';
@@ -999,6 +1017,13 @@
                 accessoryLabel.style.backgroundColor = '#f8f9ff';
                 laptopLabel.style.borderColor = '#e0e0e0';
                 laptopLabel.style.backgroundColor = 'transparent';
+                
+                if(laptopName) laptopName.required = false;
+                if(laptopPrice) laptopPrice.required = false;
+                if(accName) accName.required = true;
+                if(accPrice) accPrice.required = true;
+                if(accDesc) accDesc.required = true;
+                if(accImg) accImg.required = true;
             }
         }
         
