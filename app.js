@@ -418,9 +418,32 @@ function setupEventListeners() {
     const cartIcon = document.getElementById('cart-icon');
     const closeCart = document.getElementById('close-cart');
     const checkoutBtn = document.getElementById('checkout-btn');
+    
     if (cartIcon) cartIcon.addEventListener('click', () => { document.getElementById('cart-sidebar').classList.add('active'); cart.render(); });
     if (closeCart) closeCart.addEventListener('click', () => { document.getElementById('cart-sidebar').classList.remove('active'); });
-    if (checkoutBtn) checkoutBtn.addEventListener('click', () => { alert("شاشة الدفع"); });
+    
+    // تعديل زر إتمام الشراء ليقوم بإنشاء رسالة واتساب
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', () => {
+            if (cart.items.length === 0) {
+                alert('سلة التسوق فارغة! أضف بعض المنتجات أولاً.');
+                return;
+            }
+
+            let message = "مرحباً دكتور لابتوب، أود طلب المنتجات التالية:\n\n";
+            
+            cart.items.forEach((item, index) => {
+                message += `${index + 1}- ${item.name} (الكمية: ${item.quantity}) - ${cart.formatPrice(item.price * item.quantity)} $\n`;
+            });
+            
+            message += `\nالمجموع الكلي: ${cart.formatPrice(cart.getTotal())} $\n`;
+
+            // نستخدم رابط الواتس القياسي مع الرقم الموجود في الموقع لضمان قبول النص الديناميكي بشكل سليم
+            const whatsappUrl = `https://api.whatsapp.com/send?phone=963962400291&text=${encodeURIComponent(message)}`;
+            
+            window.open(whatsappUrl, '_blank');
+        });
+    }
 
     document.addEventListener('click', function(e) {
         const laptopBtn = e.target.closest && e.target.closest('.laptop-subfilter');
